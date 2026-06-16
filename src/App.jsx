@@ -64,7 +64,7 @@ export default function App() {
       </div>
 
       {/* Right: Product Info */}
-      <div className="w-1/2 h-full overflow-y-auto bg-white rounded-2xl border border-gray-200 shadow-sm flex flex-col justify-center px-10 py-10 gap-6">
+      <div className="w-1/2 h-full overflow-y-auto bg-white rounded-2xl border border-gray-200 shadow-sm flex flex-col justify-center px-10 py-10 pt-24 gap-6">
         {/* Title + Price */}
         <div>
           <p className="text-xs uppercase tracking-widest text-gray-400 mb-1">
