@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { product } from "./data/product";
 import RingViewer from "./components/RingViewer";
+import CartModal from "./components/CartModal";
 
 const METAL_COLORS = {
   "Yellow Gold": "#E8B923",
@@ -19,6 +20,7 @@ export default function App() {
     product.options[0].values[0],
     product.options[1].values[0],
   ]);
+  const [cartItem, setCartItem] = useState(null);
 
   const currentVariant = product.variants.find((variant) =>
     variant.options.every((opt, index) => opt === selectedOptions[index]),
@@ -36,7 +38,7 @@ export default function App() {
     `$${(cents / 100).toLocaleString("en-US", { minimumFractionDigits: 2 })}`;
 
   const handleAddToCart = () => {
-    const cartItem = {
+    const item = {
       variantId: currentVariant.id,
       title: product.title,
       metal: selectedOptions[0],
@@ -44,11 +46,15 @@ export default function App() {
       price: currentVariant.price,
       formattedPrice: formatPrice(currentVariant.price),
     };
-    console.log("Adding to cart:", cartItem);
+    console.log("Adding to cart:", item);
+    setCartItem(item);
   };
 
   return (
     <div className="flex h-screen w-screen overflow-hidden bg-[#F4F1EE] text-gray-900 font-sans p-4 gap-4">
+      {/* Cart Modal */}
+      <CartModal item={cartItem} onClose={() => setCartItem(null)} />
+
       {/* Left: 3D Viewer */}
       <div className="w-1/2 h-full rounded-2xl overflow-hidden border border-gray-200 shadow-sm bg-white">
         <RingViewer
@@ -176,10 +182,6 @@ export default function App() {
             Buy Now
           </button>
         </div>
-
-        <p className="text-xs text-center text-gray-300">
-          Free shipping & returns · Lifetime warranty
-        </p>
       </div>
     </div>
   );
