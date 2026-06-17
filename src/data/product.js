@@ -58,6 +58,6 @@ export const product = {
   ],
   options: [
     { name: "Metal", values: ["Yellow Gold", "White Gold", "Rose Gold"] },
-    { name: "Gem", values: ["White", "Emerald", "Ruby"] },
+    { name: "Gem", values: ["White"] },
   ],
 };

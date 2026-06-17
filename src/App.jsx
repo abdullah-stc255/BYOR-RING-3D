@@ -15,11 +15,29 @@ const GEM_COLORS = {
   Ruby: "#E0115F",
 };
 
+const HEADS = [
+  "R-H002-V7-RENDER-2",
+  "R-H020-V5-RENDER",
+  "R-H043-V4-RENDER",
+  "R-H049-V4-RENDER",
+  "R-H082-V5-RENDER",
+];
+
+const SHANKS = [
+  "R-S021-V1-RENDER",
+  "R-S029-V1-RENDER",
+  "R-S034-V1-RENDER",
+  "R-S056-V1-RENDER",
+  "R-S103-V1-RENDER",
+];
+
 export default function App() {
   const [selectedOptions, setSelectedOptions] = useState([
     product.options[0].values[0],
     product.options[1].values[0],
   ]);
+  const [selectedHead, setSelectedHead] = useState(HEADS[0]);
+  const [selectedShank, setSelectedShank] = useState(SHANKS[0]);
   const [cartItem, setCartItem] = useState(null);
 
   const currentVariant = product.variants.find((variant) =>
@@ -60,6 +78,8 @@ export default function App() {
         <RingViewer
           selectedMetal={selectedOptions[0]}
           selectedGem={selectedOptions[1]}
+          selectedHead={selectedHead}
+          selectedShank={selectedShank}
         />
       </div>
 
@@ -133,6 +153,56 @@ export default function App() {
                 />
               );
             })}
+          </div>
+        </div>
+
+        {/* Head selectors */}
+        <div>
+          <p className="text-xs font-medium text-gray-400 uppercase tracking-widest mb-3">
+            Head:{" "}
+            <span className="text-gray-900 normal-case tracking-normal font-semibold">
+              {selectedHead}
+            </span>
+          </p>
+          <div className="flex gap-2 flex-wrap">
+            {HEADS.map((head) => (
+              <button
+                key={head}
+                onClick={() => setSelectedHead(head)}
+                className={`px-3 py-1.5 rounded-full text-xs border transition-all ${
+                  selectedHead === head
+                    ? "border-gray-900 bg-gray-900 text-white"
+                    : "border-gray-200 text-gray-600 hover:border-gray-400"
+                }`}
+              >
+                {head}
+              </button>
+            ))}
+          </div>
+        </div>
+
+        {/* Shank selectors */}
+        <div>
+          <p className="text-xs font-medium text-gray-400 uppercase tracking-widest mb-3">
+            Shank:{" "}
+            <span className="text-gray-900 normal-case tracking-normal font-semibold">
+              {selectedShank}
+            </span>
+          </p>
+          <div className="flex gap-2 flex-wrap">
+            {SHANKS.map((shank) => (
+              <button
+                key={shank}
+                onClick={() => setSelectedShank(shank)}
+                className={`px-3 py-1.5 rounded-full text-xs border transition-all ${
+                  selectedShank === shank
+                    ? "border-gray-900 bg-gray-900 text-white"
+                    : "border-gray-200 text-gray-600 hover:border-gray-400"
+                }`}
+              >
+                {shank}
+              </button>
+            ))}
           </div>
         </div>
 
