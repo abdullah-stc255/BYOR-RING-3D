@@ -38,6 +38,7 @@ export default function App() {
   ]);
   const [selectedHead, setSelectedHead] = useState(HEADS[0]);
   const [selectedShank, setSelectedShank] = useState(SHANKS[0]);
+  const [configurator, setConfigurator] = useState({ metals: [], gems: [], heads: [], shanks: [] });
   const [cartItem, setCartItem] = useState(null);
 
   const currentVariant = product.variants.find((variant) =>
@@ -80,6 +81,7 @@ export default function App() {
           selectedGem={selectedOptions[1]}
           selectedHead={selectedHead}
           selectedShank={selectedShank}
+          onConfiguratorReady={setConfigurator}
         />
       </div>
 
@@ -109,20 +111,22 @@ export default function App() {
             </span>
           </p>
           <div className="flex gap-3">
-            {product.options[0].values.map((value) => {
-              const isSelected = selectedOptions[0] === value;
+            {(configurator.metals.length ? configurator.metals : product.options[0].values.map((v) => ({ name: v, icon: null }))).map(({ name, icon }) => {
+              const isSelected = selectedOptions[0] === name;
               return (
                 <button
-                  key={value}
-                  onClick={() => handleOptionChange(0, value)}
-                  title={value}
-                  className={`w-10 h-10 rounded-full border-2 transition-all ${
+                  key={name}
+                  onClick={() => handleOptionChange(0, name)}
+                  title={name}
+                  className={`w-10 h-10 rounded-full border-2 transition-all overflow-hidden ${
                     isSelected
                       ? "border-gray-900 scale-110 shadow-md"
                       : "border-gray-200 hover:border-gray-400"
                   }`}
-                  style={{ backgroundColor: METAL_COLORS[value] }}
-                />
+                  style={!icon ? { backgroundColor: METAL_COLORS[name] } : {}}
+                >
+                  {icon && <img src={icon} alt={name} className="w-full h-full object-cover rounded-full" />}
+                </button>
               );
             })}
           </div>
@@ -137,20 +141,22 @@ export default function App() {
             </span>
           </p>
           <div className="flex gap-3">
-            {product.options[1].values.map((value) => {
-              const isSelected = selectedOptions[1] === value;
+            {(configurator.gems.length ? configurator.gems : product.options[1].values.map((v) => ({ name: v, icon: null }))).map(({ name, icon }) => {
+              const isSelected = selectedOptions[1] === name;
               return (
                 <button
-                  key={value}
-                  onClick={() => handleOptionChange(1, value)}
-                  title={value}
-                  className={`w-10 h-10 rounded-full border-2 transition-all ${
+                  key={name}
+                  onClick={() => handleOptionChange(1, name)}
+                  title={name}
+                  className={`w-10 h-10 rounded-full border-2 transition-all overflow-hidden ${
                     isSelected
                       ? "border-gray-900 scale-110 shadow-md"
                       : "border-gray-200 hover:border-gray-400"
                   }`}
-                  style={{ backgroundColor: GEM_COLORS[value] }}
-                />
+                  style={!icon ? { backgroundColor: GEM_COLORS[name] } : {}}
+                >
+                  {icon && <img src={icon} alt={name} className="w-full h-full object-cover rounded-full" />}
+                </button>
               );
             })}
           </div>
@@ -164,20 +170,27 @@ export default function App() {
               {selectedHead}
             </span>
           </p>
-          <div className="flex gap-2 flex-wrap">
-            {HEADS.map((head) => (
-              <button
-                key={head}
-                onClick={() => setSelectedHead(head)}
-                className={`px-3 py-1.5 rounded-full text-xs border transition-all ${
-                  selectedHead === head
-                    ? "border-gray-900 bg-gray-900 text-white"
-                    : "border-gray-200 text-gray-600 hover:border-gray-400"
-                }`}
-              >
-                {head}
-              </button>
-            ))}
+          <div className="flex gap-3 flex-wrap">
+            {(configurator.heads.length ? configurator.heads : HEADS.map((h) => ({ name: h, icon: null }))).map(({ name, icon }) => {
+              const isSelected = selectedHead === name;
+              return (
+                <button
+                  key={name}
+                  onClick={() => setSelectedHead(name)}
+                  title={name}
+                  className={`w-14 h-14 rounded-xl border-2 transition-all overflow-hidden bg-gray-50 ${
+                    isSelected
+                      ? "border-gray-900 scale-110 shadow-md"
+                      : "border-gray-200 hover:border-gray-400"
+                  }`}
+                >
+                  {icon
+                    ? <img src={icon} alt={name} className="w-full h-full object-cover" />
+                    : <span className="text-[9px] text-gray-400 leading-tight px-1 flex items-center justify-center h-full text-center">{name}</span>
+                  }
+                </button>
+              );
+            })}
           </div>
         </div>
 
@@ -189,20 +202,27 @@ export default function App() {
               {selectedShank}
             </span>
           </p>
-          <div className="flex gap-2 flex-wrap">
-            {SHANKS.map((shank) => (
-              <button
-                key={shank}
-                onClick={() => setSelectedShank(shank)}
-                className={`px-3 py-1.5 rounded-full text-xs border transition-all ${
-                  selectedShank === shank
-                    ? "border-gray-900 bg-gray-900 text-white"
-                    : "border-gray-200 text-gray-600 hover:border-gray-400"
-                }`}
-              >
-                {shank}
-              </button>
-            ))}
+          <div className="flex gap-3 flex-wrap">
+            {(configurator.shanks.length ? configurator.shanks : SHANKS.map((s) => ({ name: s, icon: null }))).map(({ name, icon }) => {
+              const isSelected = selectedShank === name;
+              return (
+                <button
+                  key={name}
+                  onClick={() => setSelectedShank(name)}
+                  title={name}
+                  className={`w-14 h-14 rounded-xl border-2 transition-all overflow-hidden bg-gray-50 ${
+                    isSelected
+                      ? "border-gray-900 scale-110 shadow-md"
+                      : "border-gray-200 hover:border-gray-400"
+                  }`}
+                >
+                  {icon
+                    ? <img src={icon} alt={name} className="w-full h-full object-cover" />
+                    : <span className="text-[9px] text-gray-400 leading-tight px-1 flex items-center justify-center h-full text-center">{name}</span>
+                  }
+                </button>
+              );
+            })}
           </div>
         </div>
 

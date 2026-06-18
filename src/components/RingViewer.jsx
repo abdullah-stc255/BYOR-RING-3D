@@ -49,7 +49,7 @@ function applyComponent(viewerApp, componentName, variationName) {
   comp.applyVariation(variation);
 }
 
-export default function RingViewer({ selectedMetal, selectedGem, selectedHead, selectedShank }) {
+export default function RingViewer({ selectedMetal, selectedGem, selectedHead, selectedShank, onConfiguratorReady }) {
   const containerRef = useRef(null);
   const viewerAppRef = useRef(null);
 
@@ -73,9 +73,40 @@ export default function RingViewer({ selectedMetal, selectedGem, selectedHead, s
           if (viewer?.viewerApp) {
             viewerAppRef.current = viewer.viewerApp;
             clearInterval(poll);
+
+            const matPlugin = viewerAppRef.current.plugins?.["MaterialConfiguratorPlugin"];
+            matPlugin?.addEventListener("refreshUi", function handler(ev) {
+              const variations = ev.target.variations;
+              if (!variations?.length) return;
+
+              const toMaterialOptions = (materials) =>
+                (materials || []).map((m) => ({
+                  name: m.name,
+                  icon: m.userData?.icon || null,
+                }));
+
+              const toComponentOptions = (componentName) => {
+                const ringConfig = viewerAppRef.current?.plugins?.["RingConfigurator"];
+                const comp = ringConfig?.getComponent(componentName);
+                return (comp?.variations || []).map((v) => ({
+                  name: v.name,
+                  icon: v.icon || null,
+                }));
+              };
+
+              onConfiguratorReady?.({
+                metals: toMaterialOptions(variations.find((v) => v.uuid === "Metal 01")?.materials),
+                gems: toMaterialOptions(variations.find((v) => v.uuid === "Gem 01")?.materials),
+                heads: toComponentOptions("Heads"),
+                shanks: toComponentOptions("Shanks"),
+              });
+
+              matPlugin.removeEventListener("refreshUi", handler);
+            });
           }
         }, 100);
         setTimeout(() => clearInterval(poll), 10000);
+
       })
       .catch((err) => console.error("Viewer load error:", err));
 
