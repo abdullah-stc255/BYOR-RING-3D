@@ -3,8 +3,10 @@ import { useEffect, useRef } from "react";
 const MODEL_ID = "XsSLRlniSGucXtbNw6dAwQ";
 const BASENAME = "ringsandi";
 
-const WEBGI_URL = "https://releases.ijewel3d.com/libs/webgi-v0/bundle-0.22.0.js";
-const VIEWER_URL = "https://releases.ijewel3d.com/libs/mini-viewer/0.6.8/bundle.nowebgi.iife.js";
+const WEBGI_URL =
+  "https://releases.ijewel3d.com/libs/webgi-v0/bundle-0.22.0.js";
+const VIEWER_URL =
+  "https://releases.ijewel3d.com/libs/mini-viewer/0.6.8/bundle.nowebgi.iife.js";
 
 function loadScript(src) {
   return new Promise((resolve, reject) => {
@@ -22,20 +24,19 @@ function waitForGlobal(name, timeout = 5000) {
     const start = Date.now();
     const check = () => {
       if (window[name]) return resolve(window[name]);
-      if (Date.now() - start > timeout) return reject(new Error(`${name} not available`));
+      if (Date.now() - start > timeout)
+        return reject(new Error(`${name} not available`));
       requestAnimationFrame(check);
     };
     check();
   });
 }
 
-function applyMaterials(metal, gem) {
+function applyMaterials(selectedMaterials) {
   const params = new URLSearchParams();
-  if (metal) {
-    params.set("Metal 01", metal);
-    params.set("Metal 02", metal);
-  }
-  if (gem) params.set("Gem 01", gem);
+  Object.entries(selectedMaterials).forEach(([key, value]) => {
+    if (value) params.set(key, value);
+  });
   window.location.hash = "?" + params.toString();
 }
 
@@ -49,7 +50,12 @@ function applyComponent(viewerApp, componentName, variationName) {
   comp.applyVariation(variation);
 }
 
-export default function RingViewer({ selectedMetal, selectedGem, selectedHead, selectedShank, onConfiguratorReady }) {
+export default function RingViewer({
+  selectedMaterials,
+  selectedHead,
+  selectedShank,
+  onConfiguratorReady,
+}) {
   const containerRef = useRef(null);
   const viewerAppRef = useRef(null);
 
@@ -67,26 +73,28 @@ export default function RingViewer({ selectedMetal, selectedGem, selectedHead, s
     loadScript(WEBGI_URL)
       .then(() => loadScript(VIEWER_URL))
       .then(() => waitForGlobal("ijewelViewer"))
-      .then((viewer) => viewer.loadModelById(MODEL_ID, BASENAME, container, { showCard: false, showLogo: false }))
+      .then((viewer) =>
+        viewer.loadModelById(MODEL_ID, BASENAME, container, {
+          showCard: false,
+          showLogo: false,
+        }),
+      )
       .then((viewer) => {
         const poll = setInterval(() => {
           if (viewer?.viewerApp) {
             viewerAppRef.current = viewer.viewerApp;
             clearInterval(poll);
 
-            const matPlugin = viewerAppRef.current.plugins?.["MaterialConfiguratorPlugin"];
+            const matPlugin =
+              viewerAppRef.current.plugins?.["MaterialConfiguratorPlugin"];
             matPlugin?.addEventListener("refreshUi", function handler(ev) {
               const variations = ev.target.variations;
               if (!variations?.length) return;
 
-              const toMaterialOptions = (materials) =>
-                (materials || []).map((m) => ({
-                  name: m.name,
-                  icon: m.userData?.icon || null,
-                }));
-
+              const ringConfig =
+                viewerAppRef.current?.plugins?.["RingConfigurator"];
+              // eslint-disable-next-line no-unused-vars
               const toComponentOptions = (componentName) => {
-                const ringConfig = viewerAppRef.current?.plugins?.["RingConfigurator"];
                 const comp = ringConfig?.getComponent(componentName);
                 return (comp?.variations || []).map((v) => ({
                   name: v.name,
@@ -95,10 +103,23 @@ export default function RingViewer({ selectedMetal, selectedGem, selectedHead, s
               };
 
               onConfiguratorReady?.({
-                metals: toMaterialOptions(variations.find((v) => v.uuid === "Metal 01")?.materials),
-                gems: toMaterialOptions(variations.find((v) => v.uuid === "Gem 01")?.materials),
-                heads: toComponentOptions("Heads"),
-                shanks: toComponentOptions("Shanks"),
+                materials: variations.map((v) => ({
+                  name: v.uuid,
+                  title: v.title || v.uuid,
+                  options: (v.materials || []).map((m) => ({
+                    name: m.name,
+                    icon: m.userData?.icon || null,
+                  })),
+                })),
+                components:
+                  ringConfig?.getComponents().map((comp) => ({
+                    name: comp.name,
+                    title: comp.title || comp.name,
+                    options: comp.variations.map((v) => ({
+                      name: v.name,
+                      icon: v.icon || null,
+                    })),
+                  })) || [],
               });
 
               matPlugin.removeEventListener("refreshUi", handler);
@@ -106,17 +127,17 @@ export default function RingViewer({ selectedMetal, selectedGem, selectedHead, s
           }
         }, 100);
         setTimeout(() => clearInterval(poll), 10000);
-
       })
       .catch((err) => console.error("Viewer load error:", err));
 
-    return () => window.removeEventListener("ijewel-viewer-ready", onViewerReady);
+    return () =>
+      window.removeEventListener("ijewel-viewer-ready", onViewerReady);
   }, []);
 
   useEffect(() => {
-    if (!selectedMetal) return;
-    applyMaterials(selectedMetal, selectedGem);
-  }, [selectedMetal, selectedGem]);
+    if (!selectedMaterials || !Object.keys(selectedMaterials).length) return;
+    applyMaterials(selectedMaterials);
+  }, [selectedMaterials]);
 
   useEffect(() => {
     if (!viewerAppRef.current || !selectedHead) return;
