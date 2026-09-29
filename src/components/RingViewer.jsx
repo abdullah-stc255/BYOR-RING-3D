@@ -1,8 +1,8 @@
 import { useEffect, useRef } from "react";
 
 // const MODEL_ID = "XsSLRlniSGucXtbNw6dAwQ";
-// const MODEL_ID = "BfmyglVPSlK9tBeXup9c1g"
-const MODEL_ID = "WKUm0unjSlmYdrfc1ggO6w"
+const MODEL_ID = "BfmyglVPSlK9tBeXup9c1g"
+// const MODEL_ID = "WKUm0unjSlmYdrfc1ggO6w"
 const BASENAME = "ringsandi";
 
 const WEBGI_URL =
